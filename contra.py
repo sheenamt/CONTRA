@@ -412,20 +412,20 @@ def analysisPerBin(params, num_bin, outFolder, targetList):
 
 		# Large Region CBS
 		if (params.LARGE != "False"):
-			print "DEBUG 266a"
+#			print "DEBUG 266a"
 			rScriptName2 = os.path.join(scriptPath, "scripts", "large_region_cbs.R")
 			args = shlex.split("Rscript %s %s %s %s %s %s %s %s %s"
 			%(rScriptName2, tableName+".txt", params.SMALLSEGMENT, params.LARGESEGMENT, params.PVAL, params.PASSSIZE, params.LRS, params.LRE, bufLoc))
 			rscr2 = subprocess.call(args)
 			print str(args)
 		else:
-			print "DEBUG 266b"
+#			print "DEBUG 266b"
 
 		# Generate the DNA sequence (for VCF file)
 		bedFile  = bufTable + ".BED"
 		bedFasta = bufTable + ".fastaOut.txt"
 		fastaFile = params.FASTA
-		os.system("sed -i 's/chr//g' %s" %(bedFile))
+
 		args = shlex.split("fastaFromBed -fi %s -bed %s -fo %s -name"
 				%(fastaFile, bedFile, bedFasta))
 		print (" ".join(args))
@@ -461,7 +461,7 @@ def main():
 
 	# convert target file
 	sorted_target = os.path.join(bufLoc, "target.BED")
-        print "running: sed -e 's/chr//g' %s | sort -k1,1 -k2n > %s' %(params.TARGET, sorted_target))"
+
 	os.system("sed -e 's/chr//g' %s | sort -k1,1 -k2n > %s" %(params.TARGET, sorted_target))	
 
 	# target breakdown
