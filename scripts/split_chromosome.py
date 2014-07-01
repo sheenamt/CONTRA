@@ -32,7 +32,7 @@ def splitByChromosome(destFolder):
 		print "folder exist"
 
 	inputfile = destFolder + "sample.BEDGRAPH"
-	outputfile = destFolder + "chr/chr1.txt"
+	outputfile = destFolder + "chr/1.txt"
 	file = open(inputfile,"r")
 	output = open(outputfile,"w")
 	check = "1"
@@ -46,7 +46,7 @@ def splitByChromosome(destFolder):
 		if (chr != check):
 			output.close()
 			check = chr
-			output = open(destFolder+ "chr/chr"+check+".txt","w")
+			output = open(destFolder+ "chr/"+check+".txt","w")
 		output.write(row)
 
 	output.close()
@@ -62,7 +62,7 @@ def splitByChromosome3(infile):
 
         #inputfile = destFolder + "sample.BEDGRAPH"
         inputfile=infile
-        outputfile = destFolder + "chr/chr1.txt"
+        outputfile = destFolder + "chr/1.txt"
         file = open(inputfile,"r")
         output = open(outputfile,"w")
         check = "1"
@@ -73,7 +73,7 @@ def splitByChromosome3(infile):
                 if (chr != check):
                         output.close()
                         check = chr
-                        output = open(destFolder+ "chr/chr"+check+".txt","w")
+                        output = open(destFolder+ "chr/"+check+".txt","w")
                 output.write(row)
 
         output.close()
@@ -86,7 +86,7 @@ def splitByChromosome2(folder):
                 print "folder exist"
 
         inputfile = folder + "geneRefCoverage.txt"
-        outputfile = folder + "target/chr1.txt"
+        outputfile = folder + "target/1.txt"
         file = open(inputfile,"r")
         output = open(outputfile,"w")
         check = "1"
@@ -97,7 +97,7 @@ def splitByChromosome2(folder):
                 if (chr != check):
                         output.close()
                         check = chr
-                        output = open(folder+ "target/chr"+check+".txt","w")
+                        output = open(folder+ "target/"+check+".txt","w")
                 output.write(row)
 
         output.close()
