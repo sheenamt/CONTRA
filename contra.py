@@ -418,7 +418,7 @@ def analysisPerBin(params, num_bin, outFolder, targetList):
 			%(rScriptName2, tableName+".txt", params.SMALLSEGMENT, params.LARGESEGMENT, params.PVAL, params.PASSSIZE, params.LRS, params.LRE, bufLoc))
 			rscr2 = subprocess.call(args)
 			print str(args)
-		else:
+#		else:
 #			print "DEBUG 266b"
 
 		# Generate the DNA sequence (for VCF file)
