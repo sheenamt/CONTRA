@@ -364,7 +364,6 @@ def convertBam(params, folder, targetList, genomeFile):
 	# Convert BAM Files to BEDGRAPH
 	bedgraph = folder + "sample.BEDGRAPH"
 	args = shlex.split("genomeCoverageBed -ibam %s -bga -g %s" %(inF, genomeFile))
-	print "DEBUG 123 " + " ".join(args)
 	#output = subprocess.Popen(args, stdout = subprocess.PIPE).communicate()[0]
 	iOutFile = open(bedgraph, "w")
 	#iOutFile.write(output)
@@ -425,14 +424,11 @@ def analysisPerBin(params, num_bin, outFolder, targetList):
 
 		# Large Region CBS
 		if (params.LARGE != "False"):
-			print "DEBUG 266a"
 			rScriptName2 = os.path.join(scriptPath, "scripts", "large_region_cbs.R")
 			args = shlex.split("Rscript %s %s %s %s %s %s %s %s %s"
 			%(rScriptName2, tableName+".txt", params.SMALLSEGMENT, params.LARGESEGMENT, params.PVAL, params.PASSSIZE, params.LRS, params.LRE, bufLoc))
 			rscr2 = subprocess.call(args)
 			print str(args)
-		else:
-			print "DEBUG 266b"
 
 		# Generate the DNA sequence (for VCF file)
 		bedFile  = bufTable + ".BED"
@@ -472,7 +468,7 @@ def main():
 
 	# convert target file
 	sorted_target = os.path.join(bufLoc, "target.BED")
-	os.system("sort -k1,1 -k2n %s > %s" %(params.TARGET, sorted_target))	
+	os.system("sed -e 's/chr//g' %s | sort -k1,1 -k2n %s > %s" %(params.TARGET, sorted_target))	
 
 	# target breakdown
 	if params.MAXREGIONSIZE > 0:
