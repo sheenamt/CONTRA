@@ -468,7 +468,7 @@ def main():
 
 	# convert target file
 	sorted_target = os.path.join(bufLoc, "target.BED")
-	os.system("sed -e 's/chr//g' %s | sort -k1,1 -k2n %s > %s" %(params.TARGET, sorted_target))	
+	os.system("sed -e 's/chr//g' %s | sort -k1,1 -k2n > %s" %(params.TARGET, sorted_target))	
 
 	# target breakdown
 	if params.MAXREGIONSIZE > 0:
