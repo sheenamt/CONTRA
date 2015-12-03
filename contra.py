@@ -21,8 +21,7 @@
 #
 # 
 #-----------------------------------------------------------------------#
-# Last Updated : 23 July 2012 16:43PM
-
+# Last Updated : 03 December 2015 
 
 import os
 from optparse import OptionParser
@@ -143,6 +142,10 @@ class Params:
 			help="Size of exons that passed the p-value threshold compare to the original exon size [0.35]",
 			action="store", type="string", dest="passSize", default="0.35")
 
+                ###
+                self.parser.add_option("--removeDups",
+                        help="if specified, will remove PCR duplicates [False]",
+                        action="store_true", dest = "removeDups", default="False")
 
 		# required parameters list
 		self.ERRORLIST = []
@@ -233,6 +236,10 @@ class Params:
 		if options.passSize:
 			self.PASSSIZE	= options.passSize
 
+                ### either "False" or True atn
+                if options.removeDups:
+                        self.REMOVEDUPS = str(options.removeDups)
+
 	def repeat(self):
 		# params test
 		print "target		:", self.TARGET
@@ -251,6 +258,7 @@ class Params:
 		print "bedInput		:", self.BEDINPUT
 		print "minExon		:", self.MINEXON
 		print "largeDeletion	:", self.LARGE
+                print "removeDups       :", self.REMOVEDUPS
 def checkOutputFolder(outF):
 	print "Creating Output Folder :",
  
@@ -517,6 +525,30 @@ def main():
                 params.TEST = test_bam
 		if params.BEDINPUT == "False":
 	                params.CONTROL = ctr_bam
+
+        ###
+        # Remove PCR duplicates if --removeDups specified
+        if (params.REMOVEDUPS == "True"):
+                print "Removing reads marked as duplicates (PCR)"
+                
+                test_bam = bufLoc + "/test_removedups.BAM"
+                ctr_bam  = bufLoc + "/control_removedups.BAM"
+
+                bamTest = Process(target = removeDups, args=(params.TEST, test_bam))
+                if params.BEDINPUT == "False":
+                        bamCtr = Process(target = removeDups, args=(params.CONTROL, ctr_bam))
+
+                bamTest.start()
+                if params.BEDINPUT == "False":
+                        bamCtr.start()
+
+                bamTest.join()
+                if params.BEDINPUT == "False":
+                        bamCtr.join()
+
+                params.TEST = test_bam
+                if params.BEDINPUT == "False":
+                        params.CONTROL = ctr_bam
 	
 	# Get Chromosome Length
 	genomeFile = bufLoc + '/sample.Genome'
@@ -535,14 +567,12 @@ def main():
 		cTest = Process(target= convertBamSimple,
 			args=(params, bufLoc+'/ctrData/', targetList, genomeFile))
 	# start the processes
-	cTest.start()
 	pTest.start()
-
+	cTest.start()
 
 	# wait for all the processes to finish before continuing
-	cTest.join()
 	pTest.join()
-
+	cTest.join()
 
 	# Get the read depth count from temporary folder
 	for folder in [bufLoc+'/testData/', bufLoc+'/ctrData/']:	
@@ -574,7 +604,7 @@ def main():
 		proc.join()
 		
 	# Removed Temp Folder 
-	#removeTempFolder(bufLoc)
+	removeTempFolder(bufLoc)
 	
 if __name__ == "__main__":
 	main()
