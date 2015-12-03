@@ -143,9 +143,10 @@ class Params:
 			action="store", type="string", dest="passSize", default="0.35")
 
                 ###
-                self.parser.add_option("--removeDups",
-                        help="if specified, will remove PCR duplicates [False]",
-                        action="store_true", dest = "removeDups", default="False")
+		self.parser.add_option("--removeDups",
+			help="if specified, will remove PCR duplicates [False]",
+			action="store_true", dest = "removeDups", default="False")	
+
 
 		# required parameters list
 		self.ERRORLIST = []
@@ -235,10 +236,10 @@ class Params:
 			self.LRS	= options.lrs
 		if options.passSize:
 			self.PASSSIZE	= options.passSize
-
                 ### either "False" or True atn
-                if options.removeDups:
-                        self.REMOVEDUPS = str(options.removeDups)
+		if options.removeDups:
+			self.REMOVEDUPS = str(options.removeDups)
+			
 
 	def repeat(self):
 		# params test
@@ -258,7 +259,7 @@ class Params:
 		print "bedInput		:", self.BEDINPUT
 		print "minExon		:", self.MINEXON
 		print "largeDeletion	:", self.LARGE
-                print "removeDups       :", self.REMOVEDUPS
+		print "removeDups	:", self.REMOVEDUPS
 def checkOutputFolder(outF):
 	print "Creating Output Folder :",
  
@@ -317,8 +318,13 @@ def removeMultiMapped(inF, newBAM):
         args = shlex.split("samtools view -bq 1 %s -o %s" %(inF, newBAM))
 	removeMM = subprocess.call(args)
         print "Multi mapped reads removed. "
-
-
+        
+def removeDups(inF, newBAM):
+        # Remove
+        args = shlex.split("samtools view -b -F 0x400 %s -o %s" %(inF, newBAM))
+	removeDupsCall = subprocess.call(args)
+        print "Removed PCR duplicates. "
+        
 #BEDINPUT
 def convertBamSimple(params, folder, targetList, genomeFile):
 	if 'testData' in folder:
@@ -358,7 +364,6 @@ def convertBam(params, folder, targetList, genomeFile):
 	# Convert BAM Files to BEDGRAPH
 	bedgraph = folder + "sample.BEDGRAPH"
 	args = shlex.split("genomeCoverageBed -ibam %s -bga -g %s" %(inF, genomeFile))
-#	print "DEBUG 123 " + " ".join(args)
 	#output = subprocess.Popen(args, stdout = subprocess.PIPE).communicate()[0]
 	iOutFile = open(bedgraph, "w")
 	#iOutFile.write(output)
@@ -415,25 +420,20 @@ def analysisPerBin(params, num_bin, outFolder, targetList):
 		tName = tName[:len(tName)-4]
 		tableName = outFolder + "/table/" + tName
 		bufTable  = bufLoc + "/" + tName
-                print 'buftable:', bufTable
 		applyThreshold(tableName, bufTable, params.PVAL, 100000) #params.MAXGAP = 100000
 
 		# Large Region CBS
 		if (params.LARGE != "False"):
-#			print "DEBUG 266a"
 			rScriptName2 = os.path.join(scriptPath, "scripts", "large_region_cbs.R")
 			args = shlex.split("Rscript %s %s %s %s %s %s %s %s %s"
 			%(rScriptName2, tableName+".txt", params.SMALLSEGMENT, params.LARGESEGMENT, params.PVAL, params.PASSSIZE, params.LRS, params.LRE, bufLoc))
 			rscr2 = subprocess.call(args)
 			print str(args)
-#		else:
-#			print "DEBUG 266b"
 
 		# Generate the DNA sequence (for VCF file)
 		bedFile  = bufTable + ".BED"
 		bedFasta = bufTable + ".fastaOut.txt"
 		fastaFile = params.FASTA
-
 		args = shlex.split("fastaFromBed -fi %s -bed %s -fo %s -name"
 				%(fastaFile, bedFile, bedFasta))
 		print (" ".join(args))
@@ -442,7 +442,6 @@ def analysisPerBin(params, num_bin, outFolder, targetList):
 		# Write VCF
 		print  "Creating VCF file ... "
 		vcfFile = tableName + ".vcf"
-		print "vcf_out(bedFasta, vcfFile):"
 		vcf_out(bedFasta, vcfFile)
 
 		print "%s created. " %(vcfFile)
@@ -469,7 +468,6 @@ def main():
 
 	# convert target file
 	sorted_target = os.path.join(bufLoc, "target.BED")
-
 	os.system("sed -e 's/chr//g' %s | sort -k1,1 -k2n > %s" %(params.TARGET, sorted_target))	
 
 	# target breakdown
@@ -527,28 +525,28 @@ def main():
 	                params.CONTROL = ctr_bam
 
         ###
-        # Remove PCR duplicates if --removeDups specified
-        if (params.REMOVEDUPS == "True"):
+	# Remove PCR duplicates if --removeDups specified
+	if (params.REMOVEDUPS == "True"):
                 print "Removing reads marked as duplicates (PCR)"
                 
-                test_bam = bufLoc + "/test_removedups.BAM"
+		test_bam = bufLoc + "/test_removedups.BAM"
                 ctr_bam  = bufLoc + "/control_removedups.BAM"
-
+                
                 bamTest = Process(target = removeDups, args=(params.TEST, test_bam))
-                if params.BEDINPUT == "False":
-                        bamCtr = Process(target = removeDups, args=(params.CONTROL, ctr_bam))
+		if params.BEDINPUT == "False":
+                	bamCtr = Process(target = removeDups, args=(params.CONTROL, ctr_bam))
 
                 bamTest.start()
-                if params.BEDINPUT == "False":
-                        bamCtr.start()
+		if params.BEDINPUT == "False":
+	                bamCtr.start()
 
                 bamTest.join()
-                if params.BEDINPUT == "False":
-                        bamCtr.join()
+		if params.BEDINPUT == "False":
+	                bamCtr.join()
 
                 params.TEST = test_bam
-                if params.BEDINPUT == "False":
-                        params.CONTROL = ctr_bam
+		if params.BEDINPUT == "False":
+	                params.CONTROL = ctr_bam
 	
 	# Get Chromosome Length
 	genomeFile = bufLoc + '/sample.Genome'
